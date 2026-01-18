@@ -1,0 +1,33 @@
+/* Drag Scroll Active Mode - Override ALL cursors */
+body.drag-scroll-active {
+    cursor: grab !important;
+}
+
+body.drag-scroll-active * {
+    cursor: grab !important;
+}
+
+body.drag-scroll-active.grabbing,
+body.drag-scroll-active.grabbing * {
+    cursor: grabbing !important;
+}
+
+/* Disable text selection and pointer events during drag */
+body.drag-scroll-active .fi-table-container {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+}
+
+/* Ensure table cells don't interfere */
+body.drag-scroll-active td,
+body.drag-scroll-active th,
+body.drag-scroll-active tr {
+    pointer-events: none !important;
+}
+
+/* But allow the main container to receive events */
+body.drag-scroll-active .fi-table-container {
+    pointer-events: auto !important;
+}

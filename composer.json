@@ -1,0 +1,42 @@
+{
+    "name": "torok/filament-drag-and-scroll",
+    "description": "A custom Filament package with drag and scroll functionality, CSS and JS assets",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Torok\\FilamentDragAndScroll\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Zoltán Török",
+            "email": "torokzoltan0348@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "filament/filament": "^3.0",
+        "illuminate/contracts": "^10.0|^11.0|^12.0"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "php scripts/build-assets.php"
+        ],
+        "post-update-cmd": [
+            "php scripts/build-assets.php"
+        ],
+        "post-autoload-dump": [
+            "@php -r \"if (function_exists('opcache_reset')) opcache_reset();\""
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Torok\\FilamentDragAndScroll\\FilamentDragAndScrollServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

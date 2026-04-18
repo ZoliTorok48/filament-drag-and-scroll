@@ -120,23 +120,14 @@ The package includes composer post-install and post-update hooks that automatica
 
 ## Usage
 
-The package automatically registers CSS and JS assets with Filament. You can use the demo component in your Blade views:
+The package works automatically after installation! Simply install it with composer and the drag and scroll functionality will be available in your Filament application.
 
-```php
-use ZoltanTorok\FilamentDragAndScroll\Components\DemoComponent;
+The package automatically:
+- Registers CSS and JS assets with Filament
+- Provides drag and scroll functionality for Filament tables
+- Handles asset optimization and minification
 
-// In your Blade template
-<x-filament-drag-and-scroll::demo-component 
-    title="My Custom Title"
-    content="Custom content here"
-    :show-button="true"
-    button-text="Click Here!" 
-/>
-
-// Include the published CSS and JS
-<link rel="stylesheet" href="{{ asset('css/filament-drag-and-scroll.css') }}">
-<script src="{{ asset('js/filament-drag-and-scroll.js') }}"></script>
-```
+No additional configuration or manual asset inclusion is required. The functionality will be automatically available in your Filament admin panels.
 
 ## Configuration
 
@@ -161,7 +152,7 @@ public/
 
 ### Runtime Requirements
 - PHP ^8.1
-- Filament ^3.0
+- Filament ^5.0
 
 ### Development Requirements (Optional)
 - Node.js (for advanced minification)
@@ -180,7 +171,7 @@ public/
 - ✨ Interactive JavaScript components
 - 📦 Easy asset publishing
 - 🔧 Blade component included
-- 🚀 Filament 3.x compatible
+- 🚀 Filament 5.x compatible
 
 ## License
 

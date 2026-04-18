@@ -6,8 +6,6 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Blade;
-use ZoltanTorok\FilamentDragAndScroll\Components\DemoComponent;
 
 class FilamentDragAndScrollServiceProvider extends ServiceProvider
 {
@@ -59,9 +57,6 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
 
         // Load views
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'filament-drag-and-scroll');
-
-        // Register Blade component
-        Blade::component('filament-drag-and-scroll::demo-component', DemoComponent::class);
 
         // Publish views
         if ($this->app->runningInConsole()) {

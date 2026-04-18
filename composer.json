@@ -1,11 +1,11 @@
 {
-    "name": "torok/filament-drag-and-scroll",
+    "name": "zoltantorok/filament-drag-and-scroll",
     "description": "A custom Filament package with drag and scroll functionality, CSS and JS assets",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Torok\\FilamentDragAndScroll\\": "src/"
+            "ZoltanTorok\\FilamentDragAndScroll\\": "src/"
         }
     },
     "authors": [
@@ -33,7 +33,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Torok\\FilamentDragAndScroll\\FilamentDragAndScrollServiceProvider"
+                "ZoltanTorok\\FilamentDragAndScroll\\FilamentDragAndScrollServiceProvider"
             ]
         }
     },

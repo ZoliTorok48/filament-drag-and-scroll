@@ -24,7 +24,7 @@ npm run dev
 When publishing the package assets, run:
 
 ```bash
-composer require torok/filament-drag-and-scroll
+composer require zoltantorok/filament-drag-and-scroll
 php artisan vendor:publish --tag="filament-drag-and-scroll-assets" --force
 ```
 

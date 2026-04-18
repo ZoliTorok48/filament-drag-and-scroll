@@ -1,6 +1,6 @@
 <?php
 
-namespace Torok\FilamentDragAndScroll\Components;
+namespace ZoltanTorok\FilamentDragAndScroll\Components;
 
 use Illuminate\View\Component;
 

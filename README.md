@@ -13,7 +13,7 @@ A custom Filament package with drag and scroll functionality and automatic CSS a
 ## Installation
 
 ```bash
-composer require torok/filament-drag-and-scroll
+composer require zoltantorok/filament-drag-and-scroll
 ```
 
 ## Asset Management
@@ -123,7 +123,7 @@ The package includes composer post-install and post-update hooks that automatica
 The package automatically registers CSS and JS assets with Filament. You can use the demo component in your Blade views:
 
 ```php
-use Torok\FilamentDragAndScroll\Components\DemoComponent;
+use ZoltanTorok\FilamentDragAndScroll\Components\DemoComponent;
 
 // In your Blade template
 <x-filament-drag-and-scroll::demo-component 

@@ -1,13 +1,13 @@
 <?php
 
-namespace Torok\FilamentDragAndScroll;
+namespace ZoltanTorok\FilamentDragAndScroll;
 
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
-use Torok\FilamentDragAndScroll\Components\DemoComponent;
+use ZoltanTorok\FilamentDragAndScroll\Components\DemoComponent;
 
 class FilamentDragAndScrollServiceProvider extends ServiceProvider
 {
@@ -20,15 +20,11 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Determine if we should use minified assets
-        $useMinified = !config('app.debug', false);
-        $cssPath = $useMinified ? 'dist/css' : 'css';
-        $jsPath = $useMinified ? 'dist/js' : 'js';
-        $cssExt = $useMinified ? '.min.css' : '.css';
-        $jsExt = $useMinified ? '.min.js' : '.js';
-
-        // Note: Core assets are not auto-registered with Filament
-        // They will only be published manually when needed
+        // Register published assets with Filament
+        FilamentAsset::register([
+            Css::make('filament-drag-and-scroll', public_path('css/filament-drag-and-scroll/filament-drag-and-scroll.css')),
+            Js::make('filament-drag-and-scroll', public_path('js/filament-drag-and-scroll/filament-drag-and-scroll.js')),
+        ], package: static::$name);
 
         // Publish assets
         if ($this->app->runningInConsole()) {

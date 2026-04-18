@@ -18,11 +18,20 @@ class FilamentTableDragScroll {
     }
 
     init() {
+        // Only initialize if drag and scroll is enabled for this panel
+        if (!this.isDragScrollEnabled()) {
+            return;
+        }
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.setupEventListeners());
         } else {
             this.setupEventListeners();
         }
+    }
+
+    isDragScrollEnabled() {
+        return document.querySelector('[data-drag-scroll-enabled="true"]') !== null;
     }
 
     setupEventListeners() {

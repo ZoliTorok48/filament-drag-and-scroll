@@ -2,6 +2,7 @@
 
 namespace ZoltanTorok\FilamentDragAndScroll;
 
+use Filament\Panel;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
@@ -13,16 +14,28 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        //
+        // Add dragAndScroll() method to Panel class via macro
+        Panel::macro('dragAndScroll', function (): Panel {
+            /** @var Panel $this */
+            $this->renderHook(
+                'panels::body.start',
+                fn (): string => '<div data-drag-scroll-enabled="true" style="display: none;"></div>'
+            );
+
+            // Register assets for this specific panel
+            FilamentAsset::register([
+                Css::make('filament-drag-and-scroll', FilamentDragAndScrollServiceProvider::getDragScrollCssPath()),
+                Js::make('filament-drag-and-scroll', FilamentDragAndScrollServiceProvider::getDragScrollJsPath()),
+            ], package: 'filament-drag-and-scroll');
+
+            return $this;
+        });
     }
 
     public function boot(): void
     {
-        // Register published assets with Filament
-        FilamentAsset::register([
-            Css::make('filament-drag-and-scroll', public_path('css/filament-drag-and-scroll/filament-drag-and-scroll.css')),
-            Js::make('filament-drag-and-scroll', public_path('js/filament-drag-and-scroll/filament-drag-and-scroll.js')),
-        ], package: static::$name);
+        // Only publish assets, don't auto-register them
+        // Assets are registered per-panel when ->dragAndScroll() is called
 
         // Publish assets
         if ($this->app->runningInConsole()) {
@@ -64,5 +77,45 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
                 __DIR__ . '/../resources/views' => resource_path('views/vendor/filament-drag-and-scroll'),
             ], 'filament-drag-and-scroll-views');
         }
+    }
+
+    public static function getDragScrollCssPath(): string
+    {
+        // Check if minified version exists (production)
+        $minifiedPath = public_path('css/filament-drag-and-scroll/filament-drag-and-scroll.css');
+        if (file_exists($minifiedPath)) {
+            return $minifiedPath;
+        }
+
+        // Fallback to package resources
+        $packagePath = __DIR__ . '/../resources/';
+        $distCss = $packagePath . 'dist/css/filament-drag-and-scroll.min.css';
+        
+        if (file_exists($distCss)) {
+            return $distCss;
+        }
+
+        // Final fallback to source
+        return $packagePath . 'css/filament-drag-and-scroll.css';
+    }
+
+    public static function getDragScrollJsPath(): string
+    {
+        // Check if minified version exists (production)
+        $minifiedPath = public_path('js/filament-drag-and-scroll/filament-drag-and-scroll.js');
+        if (file_exists($minifiedPath)) {
+            return $minifiedPath;
+        }
+
+        // Fallback to package resources
+        $packagePath = __DIR__ . '/../resources/';
+        $distJs = $packagePath . 'dist/js/filament-drag-and-scroll.min.js';
+        
+        if (file_exists($distJs)) {
+            return $distJs;
+        }
+
+        // Final fallback to source
+        return $packagePath . 'js/filament-drag-and-scroll.js';
     }
 }

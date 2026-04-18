@@ -1,14 +1,17 @@
 # Filament Drag and Scroll
 
-A custom Filament package with drag and scroll functionality and automatic CSS and JS asset minification.
+A Filament package that adds configurable drag and scroll functionality to admin panels with automatic CSS and JS asset optimization.
 
 ## Features
 
+- 🎯 **Per-panel configuration** - Enable drag and scroll only for specific Filament panels
+- 🖱️ **Intuitive interaction** - Hold Shift + drag to scroll tables horizontally  
 - 🚀 Automatic asset minification during composer install/update
 - ⚡ Production-ready minified CSS and JS files
 - 🔄 Development mode with file watching
 - 📦 Smart fallback minification using PHP when npm is not available
 - 🎯 Optimized for both development and production environments
+- 💡 Visual feedback with helpful tooltips
 
 ## Installation
 
@@ -120,14 +123,85 @@ The package includes composer post-install and post-update hooks that automatica
 
 ## Usage
 
-The package works automatically after installation! Simply install it with composer and the drag and scroll functionality will be available in your Filament application.
+After installation, you can enable drag and scroll functionality for specific Filament admin panels by calling the `dragAndScroll()` method on your panel configuration.
+
+### Enable for a Panel
+
+In your **project's** panel provider (e.g., `app/Providers/Filament/AdminPanelProvider.php`):
+
+```php
+<?php
+
+namespace App\Providers\Filament;
+
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\Support\Colors\Color;
+
+class AdminPanelProvider extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            ->default()
+            ->id('admin')
+            ->path('admin')
+            ->login()
+            ->colors([
+                'primary' => Color::Amber,
+            ])
+            // ... your existing configuration ...
+            ->dragAndScroll(); // Add this method call to enable drag and scroll
+    }
+}
+```
+
+**Note**: This code goes in your Laravel application that has installed this package, not in the package itself.
+
+### Multiple Panels
+
+If you have multiple Filament panels in your application, you can choose which ones should have drag and scroll functionality:
+
+```php
+// Enable for admin panel
+class AdminPanelProvider extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            // ... configuration ...
+            ->dragAndScroll(); // Enabled
+    }
+}
+
+// Don't enable for user panel
+class UserPanelProvider extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            // ... configuration ...
+            // No ->dragAndScroll() call means this panel won't have the functionality
+    }
+}
+```
+
+### How it Works
+
+Once enabled for a panel:
+- Hold **Shift** and click on any table to activate drag mode
+- Drag horizontally to scroll through table columns
+- Release **Shift** to exit drag mode
+- A helpful tooltip will appear when drag mode is active
 
 The package automatically:
-- Registers CSS and JS assets with Filament
+- Registers CSS and JS assets only for enabled panels
 - Provides drag and scroll functionality for Filament tables
 - Handles asset optimization and minification
-
-No additional configuration or manual asset inclusion is required. The functionality will be automatically available in your Filament admin panels.
+- Shows visual feedback during drag operations
 
 ## Configuration
 

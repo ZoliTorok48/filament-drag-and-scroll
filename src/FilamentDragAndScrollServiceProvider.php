@@ -6,6 +6,7 @@ use Filament\Panel;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
+use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\ServiceProvider;
 
 class FilamentDragAndScrollServiceProvider extends ServiceProvider
@@ -15,21 +16,40 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Add dragAndScroll() method to Panel class via macro
-        Panel::macro('dragAndScroll', function (): Panel {
+        Panel::macro('dragAndScroll', function (bool $enabled = true): Panel {
             /** @var Panel $this */
-            $this->renderHook(
-                'panels::body.start',
-                fn (): string => '<div data-drag-scroll-enabled="true" style="display: none;"></div>'
-            );
+            if ($enabled) {
+                $this->renderHook(
+                    'panels::body.start',
+                    fn (): string => '<div data-drag-scroll-enabled="true" style="display: none;"></div>'
+                );
 
-            // Register assets for this specific panel
-            FilamentAsset::register([
-                Css::make('filament-drag-and-scroll', FilamentDragAndScrollServiceProvider::getDragScrollCssPath()),
-                Js::make('filament-drag-and-scroll', FilamentDragAndScrollServiceProvider::getDragScrollJsPath()),
-            ], package: 'filament-drag-and-scroll');
+                // Register assets for this specific panel
+                FilamentAsset::register([
+                    Css::make('filament-drag-and-scroll', FilamentDragAndScrollServiceProvider::getDragScrollCssPath()),
+                    Js::make('filament-drag-and-scroll', FilamentDragAndScrollServiceProvider::getDragScrollJsPath()),
+                ], package: 'filament-drag-and-scroll');
+            } else {
+                // Explicitly disable drag and scroll functionality
+                $this->renderHook(
+                    'panels::body.start',
+                    fn (): string => '<div data-drag-scroll-enabled="false" style="display: none;"></div>'
+                );
+            }
 
             return $this;
         });
+
+        // Add translations for the drag scroll functionality
+        FilamentView::registerRenderHook(
+            'panels::body.end',
+            static fn () => '<script>
+                window.dragScrollTranslations = {
+                    "dragToScrollHorizontally": "' . __('filament-drag-and-scroll::messages.dragToScrollHorizontally') . '",
+                    "releaseShiftToExit": "' . __('filament-drag-and-scroll::messages.releaseShiftToExit') . '"
+                };
+            </script>',
+        );
     }
 
     public function boot(): void
@@ -70,6 +90,9 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
 
         // Load views
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'filament-drag-and-scroll');
+
+        // Load translations
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'filament-drag-and-scroll');
 
         // Publish views
         if ($this->app->runningInConsole()) {

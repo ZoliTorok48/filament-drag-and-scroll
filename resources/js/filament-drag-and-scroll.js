@@ -6,6 +6,7 @@ class FilamentTableDragScroll {
         this.isDragging = false;
         this.scrollableElement = null;
         this.preventClick = false;
+        this.translations = {};
 
         // Store bound function references to properly remove event listeners
         this.boundOnMouseDown = this.onMouseDown.bind(this);
@@ -17,16 +18,101 @@ class FilamentTableDragScroll {
         this.init();
     }
 
-    init() {
+    async init() {
         // Only initialize if drag and scroll is enabled for this panel
         if (!this.isDragScrollEnabled()) {
             return;
         }
 
+        // Load translations first
+        await this.loadTranslations();
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.setupEventListeners());
         } else {
             this.setupEventListeners();
+        }
+    }
+
+    async loadTranslations() {
+        try {
+            // First check if translations are already provided by the server
+            if (window.dragScrollTranslations) {
+                this.translations = window.dragScrollTranslations;
+                console.log('Drag scroll: Using server-provided translations');
+                return;
+            }
+
+            // Fallback to file-based translation loading
+            let language = 'en'; // Default fallback
+            let detectionMethod = 'default';
+
+            // First, try to get Laravel app locale
+            if (window.Laravel && window.Laravel.locale) {
+                language = window.Laravel.locale;
+                detectionMethod = 'window.Laravel.locale';
+            } 
+            // Check for Filament locale (often used in Filament apps)
+            else if (window.Filament && window.Filament.locale) {
+                language = window.Filament.locale;
+                detectionMethod = 'window.Filament.locale';
+            }
+            // Check for locale meta tag
+            else if (document.querySelector('meta[name="locale"]')) {
+                language = document.querySelector('meta[name="locale"]').getAttribute('content');
+                detectionMethod = 'meta[name="locale"]';
+            }
+            // Check for global appLocale variable
+            else if (window.appLocale) {
+                language = window.appLocale;
+                detectionMethod = 'window.appLocale';
+            }
+            // Check for locale in HTML lang attribute
+            else if (document.documentElement.lang) {
+                language = document.documentElement.lang;
+                detectionMethod = 'html[lang]';
+            }
+            // Fall back to browser language detection
+            else {
+                language = navigator.language || navigator.userLanguage || 'en';
+                language = language.split('-')[0]; // Get base language (e.g., 'en' from 'en-US')
+                detectionMethod = 'browser';
+            }
+
+            // Ensure we have just the base language code
+            language = language.split('-')[0].toLowerCase();
+
+            // List of supported languages
+            const supportedLanguages = ['en', 'es', 'fr', 'de', 'it', 'pt', 'nl', 'ru', 'zh', 'ja', 'ko', 'hu', 'ro'];
+            
+            // Use supported language or fall back to English
+            if (!supportedLanguages.includes(language)) {
+                console.log(`Drag scroll: Language '${language}' not supported, falling back to English`);
+                language = 'en';
+            }
+
+            console.log(`Drag scroll: Detected language '${language}' via ${detectionMethod}`);
+
+            // Try to load the translation file
+            const response = await fetch(`/vendor/filament-drag-and-scroll/lang/${language}.json`);
+            if (response.ok) {
+                this.translations = await response.json();
+                console.log(`Drag scroll: Successfully loaded ${language} translations from file`);
+            } else {
+                console.warn(`Drag scroll: Failed to load ${language} translations (${response.status}), using fallback`);
+                // Fallback to default English translations
+                this.translations = {
+                    "dragToScrollHorizontally": "Drag to scroll horizontally",
+                    "releaseShiftToExit": "Release Shift to exit"
+                };
+            }
+        } catch (error) {
+            console.error('Drag scroll: Failed to load translations:', error);
+            // Fallback to default English translations
+            this.translations = {
+                "dragToScrollHorizontally": "Drag to scroll horizontally",
+                "releaseShiftToExit": "Release Shift to exit"
+            };
         }
     }
 
@@ -179,8 +265,8 @@ class FilamentTableDragScroll {
     showTooltip() {
         this.hideTooltip();
 
-        // Get translations with fallback to English
-        const translations = window.dragScrollTranslations || {
+        // Use loaded translations or fallback to English
+        const translations = this.translations || {
             "dragToScrollHorizontally": "Drag to scroll horizontally",
             "releaseShiftToExit": "Release Shift to exit"
         };

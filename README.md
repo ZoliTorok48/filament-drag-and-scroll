@@ -11,7 +11,7 @@ A Filament package that adds configurable drag and scroll functionality to admin
 - 🔄 Development mode with file watching
 - 📦 Smart fallback minification using PHP when npm is not available
 - 🎯 Optimized for both development and production environments
-- 💡 Visual feedback with helpful tooltips
+- 🌍 **Multi-language support** - Automatic browser language detection with 13 supported languages
 
 ## Installation
 
@@ -95,6 +95,116 @@ php artisan vendor:publish --tag="filament-drag-and-scroll-core" --force
 php artisan vendor:publish --tag="filament-drag-and-scroll-views"
 ```
 
+## Translations
+
+The package supports multiple languages with automatic browser language detection. Translation files are automatically published when you install the package.
+
+### Supported Languages
+
+- **English** (en) - Default
+- **Spanish** (es) - Español 
+- **French** (fr) - Français
+- **German** (de) - Deutsch
+- **Italian** (it) - Italiano
+- **Portuguese** (pt) - Português
+- **Dutch** (nl) - Nederlands
+- **Russian** (ru) - Русский
+- **Chinese** (zh) - 中文
+- **Japanese** (ja) - 日本語
+- **Korean** (ko) - 한국어
+- **Hungarian** (hu) - Magyar
+- **Romanian** (ro) - Română
+
+### How Translations Work
+
+The package automatically uses Laravel's translation system with **zero configuration required**:
+
+1. **Server-side injection** - Translations are embedded directly in the page using Laravel's `__()` helper
+2. **Automatic locale detection** - Uses Laravel's `app()->getLocale()` automatically  
+3. **No HTTP requests** - No need to fetch separate translation files
+4. **Fallback support** - Falls back to file-based translations if needed
+
+### Translation Files
+
+The package includes Laravel translation files in `resources/lang/[locale]/messages.php`:
+
+```php
+<?php
+return [
+    'dragToScrollHorizontally' => 'Húzd a táblázatot a vízszintes görgetéshez',
+    'releaseShiftToExit' => 'Engedd el a Shift billentyűt a kilépéshez',
+];
+```
+
+### Automatic Setup
+
+**No additional setup required!** The package automatically:
+- Registers a render hook to inject translations
+- Uses Laravel's current locale setting
+- Loads the appropriate translation strings
+- Works with all Laravel localization features
+
+### Adding Custom Translations
+
+You can customize translations by creating language files in your Laravel app:
+
+```bash
+# Create custom translation file
+php artisan make:lang hu/messages
+```
+
+Override the package translations in your app's language files:
+
+```json
+{
+    "dragToScrollHorizontally": "Your custom message",
+    "releaseShiftToExit": "Your exit message"
+}
+```
+
+## Troubleshooting Translations
+
+The new render hook approach eliminates most translation issues, but if you experience problems:
+
+### Check Browser Console
+
+Look for these messages:
+- `"Drag scroll: Using server-provided translations"` - ✅ Working correctly  
+- `"Drag scroll: Successfully loaded [lang] translations from file"` - ✅ Fallback working
+
+### Common Issues
+
+1. **Translations not updating**: Clear your application cache:
+   ```bash
+   php artisan cache:clear
+   php artisan config:clear
+   php artisan view:clear
+   ```
+
+2. **Missing language support**: Create a translation file in your Laravel app:
+   ```bash
+   # In your Laravel app
+   mkdir -p resources/lang/hu
+   # Create resources/lang/hu/filament-drag-and-scroll.php with custom translations
+   ```
+
+3. **Custom translations not working**: Ensure your app's translation file follows Laravel's structure:
+   ```php
+   // resources/lang/hu/filament-drag-and-scroll.php
+   return [
+       'messages' => [
+           'dragToScrollHorizontally' => 'Your custom text',
+           'releaseShiftToExit' => 'Your exit text',
+       ],
+   ];
+   ```
+
+### Debug Checklist
+- [ ] Check browser console for "Using server-provided translations" message
+- [ ] Verify `app()->getLocale()` returns expected language
+- [ ] Clear Laravel caches if translations aren't updating
+- [ ] Ensure translation files exist for your locale
+
 ## How It Works
 
 ### Production Mode (APP_DEBUG=false)
@@ -159,6 +269,19 @@ class AdminPanelProvider extends PanelProvider
 }
 ```
 
+### Enable/Disable the Functionality
+
+The `dragAndScroll()` method accepts an optional boolean parameter to enable or disable the functionality:
+
+```php
+// Enable drag and scroll (default behavior)
+->dragAndScroll()        // Same as dragAndScroll(true)
+->dragAndScroll(true)    // Explicitly enable
+
+// Disable drag and scroll
+->dragAndScroll(false)   // Explicitly disable
+```
+
 **Note**: This code goes in your Laravel application that has installed this package, not in the package itself.
 
 ### Multiple Panels
@@ -177,8 +300,19 @@ class AdminPanelProvider extends PanelProvider
     }
 }
 
-// Don't enable for user panel
+// Disable for user panel
 class UserPanelProvider extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            // ... configuration ...
+            ->dragAndScroll(false); // Explicitly disabled
+    }
+}
+
+// Don't call the method at all (also disabled)
+class ApiPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {

@@ -13,6 +13,11 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
 {
     public static string $name = 'filament-drag-and-scroll';
 
+    /**
+     * Register services.
+     *
+     * @return void
+     */
     public function register(): void
     {
         // Add dragAndScroll() method to Panel class via macro
@@ -52,6 +57,11 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
         );
     }
 
+    /**
+     * Bootstrap services.
+     *
+     * @return void
+     */
     public function boot(): void
     {
         // Only publish assets, don't auto-register them
@@ -88,6 +98,9 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
             }
         }
 
+        // Auto-publish assets if they haven't been published yet
+        $this->ensureAssetsArePublished();
+
         // Load views
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'filament-drag-and-scroll');
 
@@ -102,6 +115,12 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
         }
     }
 
+    /**
+     * Get the path to the CSS file, checking for published assets first, then falling back to package resources.
+     * This allows the package to work seamlessly in both development and production environments, regardless of whether assets have been published or not.
+     *
+     * @return string
+     */
     public static function getDragScrollCssPath(): string
     {
         // Check if minified version exists (production)
@@ -122,6 +141,12 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
         return $packagePath . 'css/filament-drag-and-scroll.css';
     }
 
+    /**
+     * Get the path to the JS file, checking for published assets first, then falling back to package resources.
+     * This allows the package to work seamlessly in both development and production environments, regardless of whether assets have been published or not.
+     *
+     * @return string
+     */
     public static function getDragScrollJsPath(): string
     {
         // Check if minified version exists (production)
@@ -140,5 +165,45 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
 
         // Final fallback to source
         return $packagePath . 'js/filament-drag-and-scroll.js';
+    }
+
+    /**
+     * Ensure that the necessary assets are published to the public directory.
+     * This method checks if the assets already exist in the public directory, and if not, it copies them from the package resources.
+     * This allows the package to function correctly even if the user hasn't run the publish command, while still allowing for customization if they do.
+     *
+     * @return void
+     */
+    protected function ensureAssetsArePublished(): void
+    {
+        $cssTarget = public_path('css/filament-drag-and-scroll/filament-drag-and-scroll.css');
+        $jsTarget = public_path('js/filament-drag-and-scroll/filament-drag-and-scroll.js');
+
+        if (file_exists($cssTarget) && file_exists($jsTarget)) {
+            return;
+        }
+
+        // Determine source files
+        $packagePath = __DIR__ . '/../resources/';
+        $cssDist = $packagePath . 'dist/css/filament-drag-and-scroll.min.css';
+        $jsDist = $packagePath . 'dist/js/filament-drag-and-scroll.min.js';
+        $cssSrc = file_exists($cssDist) ? $cssDist : $packagePath . 'css/filament-drag-and-scroll.css';
+        $jsSrc = file_exists($jsDist) ? $jsDist : $packagePath . 'js/filament-drag-and-scroll.js';
+
+        // Create target directories
+        if (! is_dir(dirname($cssTarget))) {
+            mkdir(dirname($cssTarget), 0755, true);
+        }
+        if (! is_dir(dirname($jsTarget))) {
+            mkdir(dirname($jsTarget), 0755, true);
+        }
+
+        // Copy assets
+        if (file_exists($cssSrc) && ! file_exists($cssTarget)) {
+            copy($cssSrc, $cssTarget);
+        }
+        if (file_exists($jsSrc) && ! file_exists($jsTarget)) {
+            copy($jsSrc, $jsTarget);
+        }
     }
 }

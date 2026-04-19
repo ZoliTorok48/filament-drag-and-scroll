@@ -67,38 +67,15 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
         // Only publish assets, don't auto-register them
         // Assets are registered per-panel when ->dragAndScroll() is called
 
-        // Publish assets
+        // Publish source assets (will be minified automatically on boot)
         if ($this->app->runningInConsole()) {
-            // Publish minified assets to public directory without .min suffix
             $this->publishes([
-                __DIR__ . '/../resources/dist/css/filament-drag-and-scroll.min.css' => public_path('css/filament-drag-and-scroll/filament-drag-and-scroll.css'),
-            ], 'filament-drag-and-scroll-css');
-
-            $this->publishes([
-                __DIR__ . '/../resources/dist/js/filament-drag-and-scroll.min.js' => public_path('js/filament-drag-and-scroll/filament-drag-and-scroll.js'),
-            ], 'filament-drag-and-scroll-js');
-
-            $this->publishes([
-                __DIR__ . '/../resources/dist/css/filament-drag-and-scroll.min.css' => public_path('css/filament-drag-and-scroll/filament-drag-and-scroll.css'),
-                __DIR__ . '/../resources/dist/js/filament-drag-and-scroll.min.js' => public_path('js/filament-drag-and-scroll/filament-drag-and-scroll.js'),
+                __DIR__ . '/../resources/css/filament-drag-and-scroll.css' => public_path('css/filament-drag-and-scroll/filament-drag-and-scroll.css'),
+                __DIR__ . '/../resources/js/filament-drag-and-scroll.js' => public_path('js/filament-drag-and-scroll/filament-drag-and-scroll.js'),
             ], 'filament-drag-and-scroll-assets');
-
-            // Publish core filament package files specifically (minified versions without .min suffix)
-            $this->publishes([
-                __DIR__ . '/../resources/dist/css/filament-drag-and-scroll.min.css' => public_path('css/filament-drag-and-scroll.css'),
-                __DIR__ . '/../resources/dist/js/filament-drag-and-scroll.min.js' => public_path('js/filament-drag-and-scroll.js'),
-            ], 'filament-drag-and-scroll-core');
-
-            // Fallback to source files if dist doesn't exist (development)
-            if (!is_dir(__DIR__ . '/../resources/dist')) {
-                $this->publishes([
-                    __DIR__ . '/../resources/css/filament-drag-and-scroll.css' => public_path('css/filament-drag-and-scroll.css'),
-                    __DIR__ . '/../resources/js/filament-drag-and-scroll.js' => public_path('js/filament-drag-and-scroll.js'),
-                ], 'filament-drag-and-scroll-source');
-            }
         }
 
-        // Auto-publish assets if they haven't been published yet
+        // Auto-minify and publish assets if they haven't been published yet
         $this->ensureAssetsArePublished();
 
         // Load views
@@ -123,22 +100,14 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
      */
     public static function getDragScrollCssPath(): string
     {
-        // Check if minified version exists (production)
-        $minifiedPath = public_path('css/filament-drag-and-scroll/filament-drag-and-scroll.css');
-        if (file_exists($minifiedPath)) {
-            return $minifiedPath;
+        // Check if published (minified) version exists
+        $publishedPath = public_path('css/filament-drag-and-scroll/filament-drag-and-scroll.css');
+        if (file_exists($publishedPath)) {
+            return $publishedPath;
         }
 
-        // Fallback to package resources
-        $packagePath = __DIR__ . '/../resources/';
-        $distCss = $packagePath . 'dist/css/filament-drag-and-scroll.min.css';
-        
-        if (file_exists($distCss)) {
-            return $distCss;
-        }
-
-        // Final fallback to source
-        return $packagePath . 'css/filament-drag-and-scroll.css';
+        // Fallback to source
+        return __DIR__ . '/../resources/css/filament-drag-and-scroll.css';
     }
 
     /**
@@ -149,22 +118,14 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
      */
     public static function getDragScrollJsPath(): string
     {
-        // Check if minified version exists (production)
-        $minifiedPath = public_path('js/filament-drag-and-scroll/filament-drag-and-scroll.js');
-        if (file_exists($minifiedPath)) {
-            return $minifiedPath;
+        // Check if published (minified) version exists
+        $publishedPath = public_path('js/filament-drag-and-scroll/filament-drag-and-scroll.js');
+        if (file_exists($publishedPath)) {
+            return $publishedPath;
         }
 
-        // Fallback to package resources
-        $packagePath = __DIR__ . '/../resources/';
-        $distJs = $packagePath . 'dist/js/filament-drag-and-scroll.min.js';
-        
-        if (file_exists($distJs)) {
-            return $distJs;
-        }
-
-        // Final fallback to source
-        return $packagePath . 'js/filament-drag-and-scroll.js';
+        // Fallback to source
+        return __DIR__ . '/../resources/js/filament-drag-and-scroll.js';
     }
 
     /**
@@ -183,12 +144,7 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
             return;
         }
 
-        // Determine source files
         $packagePath = __DIR__ . '/../resources/';
-        $cssDist = $packagePath . 'dist/css/filament-drag-and-scroll.min.css';
-        $jsDist = $packagePath . 'dist/js/filament-drag-and-scroll.min.js';
-        $cssSrc = file_exists($cssDist) ? $cssDist : $packagePath . 'css/filament-drag-and-scroll.css';
-        $jsSrc = file_exists($jsDist) ? $jsDist : $packagePath . 'js/filament-drag-and-scroll.js';
 
         // Create target directories
         if (! is_dir(dirname($cssTarget))) {
@@ -198,12 +154,64 @@ class FilamentDragAndScrollServiceProvider extends ServiceProvider
             mkdir(dirname($jsTarget), 0755, true);
         }
 
-        // Copy assets
-        if (file_exists($cssSrc) && ! file_exists($cssTarget)) {
-            copy($cssSrc, $cssTarget);
+        // Minify and publish CSS
+        if (! file_exists($cssTarget)) {
+            $cssSrc = $packagePath . 'css/filament-drag-and-scroll.css';
+            if (file_exists($cssSrc)) {
+                $css = file_get_contents($cssSrc);
+                file_put_contents($cssTarget, self::minifyCss($css));
+            }
         }
-        if (file_exists($jsSrc) && ! file_exists($jsTarget)) {
-            copy($jsSrc, $jsTarget);
+
+        // Minify and publish JS
+        if (! file_exists($jsTarget)) {
+            $jsSrc = $packagePath . 'js/filament-drag-and-scroll.js';
+            if (file_exists($jsSrc)) {
+                $js = file_get_contents($jsSrc);
+                file_put_contents($jsTarget, self::minifyJs($js));
+            }
         }
+    }
+
+    /**
+     * Simple CSS minification function to reduce file size for production use.
+     * This is a basic implementation and may not cover all edge cases, but it should work well for typical CSS files.
+     *
+     * @param string $css The original CSS content
+     * @return string The minified CSS content
+     */
+    protected static function minifyCss(string $css): string
+    {
+        // Remove comments
+        $css = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $css);
+        // Remove whitespace
+        $css = preg_replace('/\s+/', ' ', $css);
+        // Remove whitespace around certain characters
+        $css = preg_replace('/\s*([{}|:;,>+~])\s*/', '$1', $css);
+        // Remove trailing semicolon before closing brace
+        $css = preg_replace('/;(\s*})/', '$1', $css);
+
+        return trim($css);
+    }
+
+    /**
+     * Simple JS minification function to reduce file size for production use.
+     * This is a basic implementation and may not cover all edge cases, but it should work well for typical JS files.
+     *
+     * @param string $js The original JS content
+     * @return string The minified JS content
+     */
+    protected static function minifyJs(string $js): string
+    {
+        // Remove single-line comments (but not URLs with //)
+        $js = preg_replace('#(?<!:)//(?!/).*$#m', '', $js);
+        // Remove multi-line comments
+        $js = preg_replace('/\/\*.*?\*\//s', '', $js);
+        // Collapse whitespace
+        $js = preg_replace('/\s+/', ' ', $js);
+        // Remove whitespace around operators and punctuation
+        $js = preg_replace('/\s*([{}:;,()=+\-*\/<>!&|?])\s*/', '$1', $js);
+
+        return trim($js);
     }
 }

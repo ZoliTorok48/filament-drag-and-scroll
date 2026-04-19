@@ -1,17 +1,20 @@
 # Filament Drag and Scroll
 
-A Filament package that adds configurable drag and scroll functionality to admin panels with automatic CSS and JS asset optimization.
+Horizontal table scrolling in Filament can be frustrating, especially for users with basic mice that lack a horizontal scroll wheel, trackball users, or anyone working with accessibility needs. This package solves that problem by letting users hold **Shift** and drag to scroll tables horizontally with ease.
 
 ## Features
 
-- 🎯 **Per-panel configuration** - Enable drag and scroll only for specific Filament panels
-- 🖱️ **Intuitive interaction** - Hold Shift + drag to scroll tables horizontally  
-- 🚀 Automatic asset minification during composer install/update
-- ⚡ Production-ready minified CSS and JS files
-- 🔄 Development mode with file watching
-- 📦 Smart fallback minification using PHP when npm is not available
-- 🎯 Optimized for both development and production environments
-- 🌍 **Multi-language support** - Automatic browser language detection with 13 supported languages
+- **Shift + Drag to scroll** - Hold Shift and drag any table to scroll horizontally
+- **Per-panel configuration** - Enable for specific Filament panels using a simple method call
+- **Visual feedback** - Tooltip and cursor changes guide the user
+- **13 languages included** - Automatic translation based on your app locale
+- **Zero configuration** - Install, enable, and it just works
+
+## Requirements
+
+- PHP ^8.1
+- Laravel ^11.0
+- Filament ^5.0
 
 ## Installation
 
@@ -19,237 +22,13 @@ A Filament package that adds configurable drag and scroll functionality to admin
 composer require zoltantorok/filament-drag-and-scroll
 ```
 
-## Asset Management
-
-### Automatic Build Process
-
-Assets are automatically built and minified when you:
-- Run `composer install`
-- Run `composer update`
-- Manually execute `php scripts/build-assets.php`
-
-### Development Setup
-
-For development with automatic rebuilding:
-
-```bash
-# Install dependencies
-npm install
-
-# Start development mode with file watching
-npm run dev
-```
-
-### Manual Building
-
-```bash
-# Build all assets
-npm run build
-
-# Build only CSS
-npm run build:css
-
-# Build only JS  
-npm run build:js
-
-# Clean build artifacts
-npm run clean
-```
-
-## Asset Structure
-
-```
-resources/
-├── css/                     # Source CSS files
-│   └── filament-drag-and-scroll.css
-├── js/                      # Source JavaScript files  
-│   └── filament-drag-and-scroll.js
-└── dist/                    # Generated minified files (auto-created)
-    ├── css/
-    │   └── filament-drag-and-scroll.min.css
-    └── js/
-        └── filament-drag-and-scroll.min.js
-```
-
-## Publishing Assets
-
-### Publish All Assets
-
-```bash
-php artisan vendor:publish --tag="filament-drag-and-scroll-assets" --force
-```
-
-### Specific Asset Types
-
-```bash
-# CSS only
-php artisan vendor:publish --tag="filament-drag-and-scroll-css" --force
-
-# JS only
-php artisan vendor:publish --tag="filament-drag-and-scroll-js" --force
-
-# Core files only
-php artisan vendor:publish --tag="filament-drag-and-scroll-core" --force
-
-# Views
-php artisan vendor:publish --tag="filament-drag-and-scroll-views"
-```
-
-## Translations
-
-The package supports multiple languages with automatic browser language detection. Translation files are automatically published when you install the package.
-
-### Supported Languages
-
-- **English** (en) - Default
-- **Spanish** (es) - Español 
-- **French** (fr) - Français
-- **German** (de) - Deutsch
-- **Italian** (it) - Italiano
-- **Portuguese** (pt) - Português
-- **Dutch** (nl) - Nederlands
-- **Russian** (ru) - Русский
-- **Chinese** (zh) - 中文
-- **Japanese** (ja) - 日本語
-- **Korean** (ko) - 한국어
-- **Hungarian** (hu) - Magyar
-- **Romanian** (ro) - Română
-
-### How Translations Work
-
-The package automatically uses Laravel's translation system with **zero configuration required**:
-
-1. **Server-side injection** - Translations are embedded directly in the page using Laravel's `__()` helper
-2. **Automatic locale detection** - Uses Laravel's `app()->getLocale()` automatically  
-3. **No HTTP requests** - No need to fetch separate translation files
-4. **Fallback support** - Falls back to file-based translations if needed
-
-### Translation Files
-
-The package includes Laravel translation files in `resources/lang/[locale]/messages.php`:
-
-```php
-<?php
-return [
-    'dragToScrollHorizontally' => 'Húzd a táblázatot a vízszintes görgetéshez',
-    'releaseShiftToExit' => 'Engedd el a Shift billentyűt a kilépéshez',
-];
-```
-
-### Automatic Setup
-
-**No additional setup required!** The package automatically:
-- Registers a render hook to inject translations
-- Uses Laravel's current locale setting
-- Loads the appropriate translation strings
-- Works with all Laravel localization features
-
-### Adding Custom Translations
-
-You can customize translations by creating language files in your Laravel app:
-
-```bash
-# Create custom translation file
-php artisan make:lang hu/messages
-```
-
-Override the package translations in your app's language files:
-
-```json
-{
-    "dragToScrollHorizontally": "Your custom message",
-    "releaseShiftToExit": "Your exit message"
-}
-```
-
-## Troubleshooting Translations
-
-The new render hook approach eliminates most translation issues, but if you experience problems:
-
-### Check Browser Console
-
-Look for these messages:
-- `"Drag scroll: Using server-provided translations"` - ✅ Working correctly  
-- `"Drag scroll: Successfully loaded [lang] translations from file"` - ✅ Fallback working
-
-### Common Issues
-
-1. **Translations not updating**: Clear your application cache:
-   ```bash
-   php artisan cache:clear
-   php artisan config:clear
-   php artisan view:clear
-   ```
-
-2. **Missing language support**: Create a translation file in your Laravel app:
-   ```bash
-   # In your Laravel app
-   mkdir -p resources/lang/hu
-   # Create resources/lang/hu/filament-drag-and-scroll.php with custom translations
-   ```
-
-3. **Custom translations not working**: Ensure your app's translation file follows Laravel's structure:
-   ```php
-   // resources/lang/hu/filament-drag-and-scroll.php
-   return [
-       'messages' => [
-           'dragToScrollHorizontally' => 'Your custom text',
-           'releaseShiftToExit' => 'Your exit text',
-       ],
-   ];
-   ```
-
-### Debug Checklist
-- [ ] Check browser console for "Using server-provided translations" message
-- [ ] Verify `app()->getLocale()` returns expected language
-- [ ] Clear Laravel caches if translations aren't updating
-- [ ] Ensure translation files exist for your locale
-
-## How It Works
-
-### Production Mode (APP_DEBUG=false)
-- Assets are served from `resources/dist/` (minified versions)
-- Files are published as `.min.css` and `.min.js`
-- Optimized for performance
-
-### Development Mode (APP_DEBUG=true)
-- Assets are served from `resources/css/` and `resources/js/` (source versions)
-- No minification applied for easier debugging
-- Full source maps and readable code
-
-### Build Process
-
-1. **NPM Available**: Uses professional minifiers (clean-css and terser)
-2. **NPM Unavailable**: Falls back to PHP-based minification
-3. **No Build Tools**: Serves source files directly
-
-### Composer Integration
-
-The package includes composer post-install and post-update hooks that automatically:
-1. Detect the environment (development vs production)
-2. Run the appropriate build process
-3. Generate minified assets
-4. Ensure assets are ready for publishing
-
 ## Usage
 
-After installation, you can enable drag and scroll functionality for specific Filament admin panels by calling the `dragAndScroll()` method on your panel configuration.
-
-### Enable for a Panel
-
-In your **project's** panel provider (e.g., `app/Providers/Filament/AdminPanelProvider.php`):
+Add `->dragAndScroll()` to your panel provider:
 
 ```php
-<?php
-
-namespace App\Providers\Filament;
-
-use Filament\Http\Middleware\Authenticate;
-use Filament\Http\Middleware\DisableBladeIconComponents;
-use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -260,127 +39,86 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->colors([
-                'primary' => Color::Amber,
-            ])
-            // ... your existing configuration ...
-            ->dragAndScroll(); // Add this method call to enable drag and scroll
+            ->dragAndScroll();
     }
 }
 ```
 
-### Enable/Disable the Functionality
+That's it. Your users can now hold **Shift** and drag to scroll any table horizontally.
 
-The `dragAndScroll()` method accepts an optional boolean parameter to enable or disable the functionality:
+### Disabling
 
 ```php
-// Enable drag and scroll (default behavior)
-->dragAndScroll()        // Same as dragAndScroll(true)
-->dragAndScroll(true)    // Explicitly enable
-
-// Disable drag and scroll
-->dragAndScroll(false)   // Explicitly disable
+->dragAndScroll(false)
 ```
 
-**Note**: This code goes in your Laravel application that has installed this package, not in the package itself.
+Or simply don't call the method on panels where you don't need it.
 
-### Multiple Panels
+## How It Works
 
-If you have multiple Filament panels in your application, you can choose which ones should have drag and scroll functionality:
+1. User holds **Shift** - the cursor changes and a tooltip appears
+2. User clicks and drags on a table - the table scrolls horizontally
+3. User releases **Shift** - drag mode deactivates
+
+The interaction is designed to stay out of the way. It doesn't interfere with normal table usage, text selection, or other Filament features.
+
+## Translations
+
+The package uses Laravel's translation system and automatically detects your app locale. No configuration required.
+
+### Supported Languages
+
+| Language | Code |
+|----------|------|
+| English | `en` |
+| Spanish | `es` |
+| French | `fr` |
+| German | `de` |
+| Italian | `it` |
+| Portuguese | `pt` |
+| Dutch | `nl` |
+| Russian | `ru` |
+| Chinese | `zh` |
+| Japanese | `ja` |
+| Korean | `ko` |
+| Hungarian | `hu` |
+| Romanian | `ro` |
+
+### Customizing Translations
+
+Publish the translation files to override them:
+
+```bash
+php artisan vendor:publish --tag="filament-drag-and-scroll-views"
+```
+
+Or create your own in `resources/lang/vendor/filament-drag-and-scroll/{locale}/messages.php`:
 
 ```php
-// Enable for admin panel
-class AdminPanelProvider extends PanelProvider
-{
-    public function panel(Panel $panel): Panel
-    {
-        return $panel
-            // ... configuration ...
-            ->dragAndScroll(); // Enabled
-    }
-}
+<?php
 
-// Disable for user panel
-class UserPanelProvider extends PanelProvider
-{
-    public function panel(Panel $panel): Panel
-    {
-        return $panel
-            // ... configuration ...
-            ->dragAndScroll(false); // Explicitly disabled
-    }
-}
-
-// Don't call the method at all (also disabled)
-class ApiPanelProvider extends PanelProvider
-{
-    public function panel(Panel $panel): Panel
-    {
-        return $panel
-            // ... configuration ...
-            // No ->dragAndScroll() call means this panel won't have the functionality
-    }
-}
+return [
+    'dragToScrollHorizontally' => 'Your custom message',
+    'releaseShiftToExit' => 'Your custom exit message',
+];
 ```
 
-### How it Works
+## Publishing Assets
 
-Once enabled for a panel:
-- Hold **Shift** and click on any table to activate drag mode
-- Drag horizontally to scroll through table columns
-- Release **Shift** to exit drag mode
-- A helpful tooltip will appear when drag mode is active
+Assets are registered automatically. If you need to publish them manually:
 
-The package automatically:
-- Registers CSS and JS assets only for enabled panels
-- Provides drag and scroll functionality for Filament tables
-- Handles asset optimization and minification
-- Shows visual feedback during drag operations
-
-## Configuration
-
-The package automatically detects your environment and chooses the best asset version:
-
-- **Production**: Serves minified `.min.css` and `.min.js` files
-- **Development**: Serves source `.css` and `.js` files for easier debugging
-
-## Published Files Location
-
-When assets are published, they are copied to:
-
-```
-public/
-├── css/
-│   └── filament-drag-and-scroll.css
-└── js/
-    └── filament-drag-and-scroll.js
+```bash
+php artisan vendor:publish --tag="filament-drag-and-scroll-assets" --force
 ```
 
-## Requirements
+## Contributing
 
-### Runtime Requirements
-- PHP ^8.1
-- Filament ^5.0
+Contributions are welcome! Feel free to submit a pull request.
 
-### Development Requirements (Optional)
-- Node.js (for advanced minification)
-- npm
+## Credits
 
-## Assets
-
-- **CSS**: Contains custom styles for drag and scroll functionality
-- **JavaScript**: Provides interactive drag and scroll functionality for Filament tables
-- **filament-drag-and-scroll.css**: Core CSS file for Filament integration (minified, published without .min suffix)
-- **filament-drag-and-scroll.js**: Core JavaScript file for Filament integration (minified, published without .min suffix)
-
-## Features
-
-- 🎨 Custom CSS with modern design
-- ✨ Interactive JavaScript components
-- 📦 Easy asset publishing
-- 🔧 Blade component included
-- 🚀 Filament 5.x compatible
+- [Zoltán Török](https://github.com/ZoliTorok48)
 
 ## License
 
-MIT License
+The MIT License (MIT). Please see [LICENSE](LICENSE) for more information.

@@ -8,7 +8,6 @@ yarn-error.log*
 vendor/
 
 # Built assets
-resources/dist/
 public/
 
 # Environment files
@@ -60,7 +59,6 @@ yarn.lock
 pnpm-lock.yaml
 
 # Build artifacts
-dist/
 build/
 
 # Testing

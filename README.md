@@ -13,7 +13,7 @@ Horizontal table scrolling in Filament can be frustrating, especially for users 
 ## Requirements
 
 - PHP ^8.1
-- Laravel ^11.0
+- Laravel ^11.0 | ^12.0 | ^13.0
 - Filament ^5.0
 
 ## Installation
